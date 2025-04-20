@@ -85,4 +85,75 @@ also perform block creation, and replication upon instruction from the NameNode.
 
 <img width="1049" alt="image" src="https://github.com/user-attachments/assets/eb75215d-6459-4ad3-bfaf-581a4f352162" />
 
+### Key Terminology and Components of HDFS
+
+**Block:** Block is the smallest unit of storage on a computer system. It is the smallest contiguous storage allocated 
+to a file. In Hadoop we have a default block size of 128MB or 256MB.
+- If you have file of 50MB and the HDFS block size of 128MB then the file will only use 50MB of one block. The 
+remaining 78MB will be unused.
+- It's important to note that this is one of the reasons why HDFS is not well-suited to handling a
+large number of small files. Since each file is allocated its own blocks, if you have a lot of files
+that are much smaller than the block size, then a lot of space can be wasted.
+- This is also why block size in HDFS is considerably larger than it is in other file systems
+(default of 128 MB, as opposed to a few KBs or MBs in other systems). Larger block sizes
+mean fewer blocks for the same amount of data, leading to less metadata to manage, less
+communication between the NameNode and DataNodes, and better performance for large,
+streaming reads of data.
+
+**Replication Management:** To provide fault tolerance HDFS uses a replication technique. In that it makes copies of the 
+blocks and stores in on different DataNodes. Replication factor decides how many copies of the blocks get stored. It 
+is 3 by default but we can configure to any value.
+
+**Rack Awareness:** A rack contains many DataNode machines and there are several such racks in the production. HDFS 
+follows a rack awareness algorithm to place the replicas of the blocks in distributed fashion. This rack awareness 
+algorithm provides for low latency and fault tolerance. Suppose the replication factor configured is 3. Now rack
+awareness algorithm will place the first block on a local rack. It will keep the other two blocks on a different 
+rack. It does not store more than two blocks in the same rack if possible.
+
+**Secondary Namenode:** The Secondary NameNode in Hadoop HDFS is a specially dedicated node in the Hadoop cluster
+that serves as a helper to the primary NameNode, but not as a standby NameNode. Its main roles are to take checkpoints of
+the filesystem metadata and help in keeping the filesystem metadata size within a reasonable limit.
+
+**Checkpointing:** The Secondary NameNode periodically creates checkpoints of the namespace by merging the
+fsimage file and the edits log file from the NameNode. The new fsimage file is then transferred back to the NameNode.
+These checkpoints help reduce startup time of the NameNode.
+
+**Size management:** The Secondary NameNode helps in reducing the size of the edits log file on the NameNode. By
+creating regular checkpoints, the edits log file can be purged occasionally, ensuring it does not grow too large
+
+A common misconception is that the Secondary NameNode is a failover option for the primary NameNode. However, this is
+not the case; the Secondary NameNode cannot substitute for the primary NameNode in the event of a failure. For that,
+Hadoop 2 introduces the concept of Standby NameNode.
+
+**Standby Namenode:** In Hadoop, the Standby NameNode is part of the **High Availability (HA)** feature of HDFS that was
+introduced with Hadoop 2.x. This feature addresses one of the main drawbacks of the earlier versions of Hadoop: the single
+point of failure in the system, which was the NameNode.
+
+- The Standby NameNode is essentially a hot backup for the Active NameNode. The Standby NameNode and Active
+  NameNode are in constant synchronization with each other. When the Active NameNode updates its state, it records  
+  the changes to the edit log, and the Standby NameNode applies these changes to its own state, keeping both  
+  NameNodes in sync.
+- The Standby NameNode maintains a copy of the namespace image in memory, just like the Active NameNode. This
+  means it can quickly take over the duties of the Active NameNode in case of a failure, providing minimal downtime and
+  disruption.
+- Unlike the Secondary NameNode, the Standby NameNode is capable of taking over the role of the Active NameNode
+  immediately without any data loss, thus ensuring the High Availability of the HDFS system.
+
+### Write Operation in HDFS
+- Client send write request to NameNode.
+- Name Node gives the DataNode IP address where the data needs to be saved.
+- Client check weather the DataNodes are ready to written or not.
+- Client writes the block A in the DataNode 1.
+- Data Node 1 creates the replica in the Rack 5 in Data Node 4 and 4 does create replica in 6.
+- Client receives the Ack from Data node 1,4 and 6
+- Client Node sends signal to NameNode that the write operation is successful.
+
+### Read Operation in HDFS
+- Client send read request to NameNode for Block A & B.
+- NameNode gives the DataNode IP address from where the Block A & B needs to be rade.
+- Client will read the Block A from DN 1 and Block B from DN 3.
+
+
+
+
 
