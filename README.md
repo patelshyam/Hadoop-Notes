@@ -91,6 +91,9 @@ also perform block creation, and replication upon instruction from the NameNode.
 to a file. In Hadoop we have a default block size of 128MB or 256MB.
 - If you have file of 50MB and the HDFS block size of 128MB then the file will only use 50MB of one block. The 
 remaining 78MB will be unused.
+
+<img width="866" alt="image" src="https://github.com/user-attachments/assets/9c9399a3-b7f0-4ed4-96c3-40bf08c71846" />
+
 - It's important to note that this is one of the reasons why HDFS is not well-suited to handling a
 large number of small files. Since each file is allocated its own blocks, if you have a lot of files
 that are much smaller than the block size, then a lot of space can be wasted.
@@ -104,15 +107,22 @@ streaming reads of data.
 blocks and stores in on different DataNodes. Replication factor decides how many copies of the blocks get stored. It 
 is 3 by default but we can configure to any value.
 
+<img width="804" alt="image" src="https://github.com/user-attachments/assets/4ced8e3c-731c-4228-b841-534bcc8d0b9b" />
+
+
 **Rack Awareness:** A rack contains many DataNode machines and there are several such racks in the production. HDFS 
 follows a rack awareness algorithm to place the replicas of the blocks in distributed fashion. This rack awareness 
 algorithm provides for low latency and fault tolerance. Suppose the replication factor configured is 3. Now rack
 awareness algorithm will place the first block on a local rack. It will keep the other two blocks on a different 
 rack. It does not store more than two blocks in the same rack if possible.
 
+<img width="1228" alt="image" src="https://github.com/user-attachments/assets/d6b2287d-e3f5-45e7-b132-c90a73bf845d" />
+
 **Secondary Namenode:** The Secondary NameNode in Hadoop HDFS is a specially dedicated node in the Hadoop cluster
 that serves as a helper to the primary NameNode, but not as a standby NameNode. Its main roles are to take checkpoints of
 the filesystem metadata and help in keeping the filesystem metadata size within a reasonable limit.
+
+<img width="1062" alt="image" src="https://github.com/user-attachments/assets/ff501968-f58b-4a11-888a-44c76d53be04" />
 
 **Checkpointing:** The Secondary NameNode periodically creates checkpoints of the namespace by merging the
 fsimage file and the edits log file from the NameNode. The new fsimage file is then transferred back to the NameNode.
@@ -139,6 +149,9 @@ point of failure in the system, which was the NameNode.
 - Unlike the Secondary NameNode, the Standby NameNode is capable of taking over the role of the Active NameNode
   immediately without any data loss, thus ensuring the High Availability of the HDFS system.
 
+  <img width="947" alt="image" src="https://github.com/user-attachments/assets/554f7a34-6a40-490b-aa8e-07d1d01ea0ae" />
+
+
 ### Write Operation in HDFS
 - Client send write request to NameNode.
 - Name Node gives the DataNode IP address where the data needs to be saved.
@@ -148,12 +161,20 @@ point of failure in the system, which was the NameNode.
 - Client receives the Ack from Data node 1,4 and 6
 - Client Node sends signal to NameNode that the write operation is successful.
 
+<img width="947" alt="image" src="https://github.com/user-attachments/assets/d575c958-a6a5-4ffa-b1b4-fdb20078e8e6" />
+
+<img width="947" alt="image" src="https://github.com/user-attachments/assets/027e341c-30e8-4bab-b91a-8f4aeca5ebe6" />
+
+<img width="1067" alt="image" src="https://github.com/user-attachments/assets/e94b7c9a-d2ae-4362-b999-6147b3d44c10" />
+
+
 ### Read Operation in HDFS
 - Client send read request to NameNode for Block A & B.
 - NameNode gives the DataNode IP address from where the Block A & B needs to be rade.
 - Client will read the Block A from DN 1 and Block B from DN 3.
 
 
+<img width="1067" alt="image" src="https://github.com/user-attachments/assets/21397de4-bd3f-4f73-b2cc-6f65b73ed42b" />
 
 
 
